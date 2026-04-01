@@ -1,0 +1,47 @@
+export const theme = {
+  bg: '#f4f1ec',
+  bgWarm: '#faf8f4',
+  bgCard: '#ffffff',
+  cardBorder: '#e8e4de',
+  accent: '#a688b5',
+  accentLight: '#e8ddef',
+  accentSoft: '#f3eef6',
+  pastelPink: '#e8b8b8',
+  pastelBlue: '#a8bce0',
+  pastelGreen: '#a8d4b2',
+  pastelLavender: '#b8b0d8',
+  pastelPeach: '#f0c8a8',
+  pastelMint: '#a0d4c8',
+  green: '#6aab68',
+  greenLight: '#e2f2e1',
+  text: '#2e2a24',
+  textDim: '#7a7268',
+  textMuted: '#a89e94',
+  border: '#e0dbd4',
+  white: '#ffffff',
+
+  fontSize: {
+    xs: 10,
+    sm: 12,
+    md: 14,
+    lg: 18,
+    xl: 24,
+    xxl: 32,
+  },
+
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 24,
+    xxl: 32,
+  },
+
+  borderRadius: {
+    sm: 8,
+    md: 14,
+    lg: 20,
+    xl: 28,
+  },
+};
