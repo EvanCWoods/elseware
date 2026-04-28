@@ -1,24 +1,27 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { Alert } from 'react-native';
-import Purchases, { PurchasesPackage, CustomerInfo } from 'react-native-purchases';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import Purchases, { CustomerInfo, PurchasesPackage } from 'react-native-purchases';
 import { REVENUECAT_API_KEY, ENTITLEMENT_ID } from '../config/constants';
 
 interface PurchaseContextValue {
   isPro: boolean;
+  priceString: string | null;
+  paywallVisible: boolean;
   isLoading: boolean;
-  showPaywall: boolean;
-  setShowPaywall: (show: boolean) => void;
-  purchasePro: () => Promise<void>;
-  restorePurchases: () => Promise<void>;
+  showPaywall: () => void;
+  hidePaywall: () => void;
+  purchase: () => Promise<void>;
+  restore: () => Promise<void>;
 }
 
 const PurchaseContext = createContext<PurchaseContextValue>({
   isPro: false,
+  priceString: null,
+  paywallVisible: false,
   isLoading: false,
-  showPaywall: false,
-  setShowPaywall: () => {},
-  purchasePro: async () => {},
-  restorePurchases: async () => {},
+  showPaywall: () => {},
+  hidePaywall: () => {},
+  purchase: async () => {},
+  restore: async () => {},
 });
 
 export function usePurchaseContext() {
@@ -27,40 +30,27 @@ export function usePurchaseContext() {
 
 export function PurchaseProvider({ children }: { children: React.ReactNode }) {
   const [isPro, setIsPro] = useState(false);
+  const [pkg, setPkg] = useState<PurchasesPackage | null>(null);
+  const [priceString, setPriceString] = useState<string | null>(null);
+  const [paywallVisible, setPaywallVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
-  const lifetimePackageRef = useRef<PurchasesPackage | null>(null);
 
   useEffect(() => {
     async function init() {
       try {
         Purchases.configure({ apiKey: REVENUECAT_API_KEY });
-
         const customerInfo = await Purchases.getCustomerInfo();
         checkEntitlement(customerInfo);
 
         const offerings = await Purchases.getOfferings();
         const current = offerings.current;
-        if (current?.lifetime) {
-          lifetimePackageRef.current = current.lifetime;
-        } else if (current?.availablePackages?.length) {
-          // Fallback: use the first available package if lifetime isn't set
-          lifetimePackageRef.current = current.availablePackages[0];
+        if (current && current.availablePackages.length > 0) {
+          const p = current.availablePackages[0];
+          setPkg(p);
+          setPriceString(p.product.priceString);
         }
-
-        // TODO: Remove this debug alert once purchases are working
-        const entitlementKeys = Object.keys(customerInfo.entitlements.active);
-        const pkgType = lifetimePackageRef.current?.packageType ?? 'none';
-        Alert.alert(
-          'RevenueCat Debug',
-          `isPro: ${!!customerInfo.entitlements.active[ENTITLEMENT_ID]}\n` +
-          `Active entitlements: ${entitlementKeys.length ? entitlementKeys.join(', ') : 'none'}\n` +
-          `Package found: ${!!lifetimePackageRef.current} (type: ${pkgType})\n` +
-          `Looking for entitlement: "${ENTITLEMENT_ID}"`
-        );
       } catch (e) {
         console.warn('RevenueCat init error:', e);
-        Alert.alert('RevenueCat Error', String(e));
       }
     }
 
@@ -78,43 +68,37 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
     setIsPro(!!info.entitlements.active[ENTITLEMENT_ID]);
   }
 
-  async function purchasePro() {
-    if (!lifetimePackageRef.current) {
-      console.warn('No lifetime package available');
-      return;
-    }
+  function showPaywall() {
+    setPaywallVisible(true);
+  }
 
+  function hidePaywall() {
+    setPaywallVisible(false);
+  }
+
+  async function purchase() {
+    if (!pkg) return;
     setIsLoading(true);
     try {
-      const { customerInfo } = await Purchases.purchasePackage(lifetimePackageRef.current);
-      const entitlementKeys = Object.keys(customerInfo.entitlements.active);
-      // TODO: Remove this debug alert once purchases are working
-      Alert.alert(
-        'Purchase Result',
-        `Active entitlements: ${entitlementKeys.length ? entitlementKeys.join(', ') : 'none'}\n` +
-        `isPro: ${!!customerInfo.entitlements.active[ENTITLEMENT_ID]}`
-      );
+      const { customerInfo } = await Purchases.purchasePackage(pkg);
       checkEntitlement(customerInfo);
-      if (customerInfo.entitlements.active[ENTITLEMENT_ID]) {
-        setShowPaywall(false);
-      }
+      setPaywallVisible(false);
     } catch (e: any) {
       if (!e.userCancelled) {
         console.warn('Purchase error:', e);
-        Alert.alert('Purchase Error', String(e));
       }
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function restorePurchases() {
+  async function restore() {
     setIsLoading(true);
     try {
       const customerInfo = await Purchases.restorePurchases();
       checkEntitlement(customerInfo);
       if (customerInfo.entitlements.active[ENTITLEMENT_ID]) {
-        setShowPaywall(false);
+        setPaywallVisible(false);
       }
     } catch (e) {
       console.warn('Restore error:', e);
@@ -125,7 +109,7 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PurchaseContext.Provider
-      value={{ isPro, isLoading, showPaywall, setShowPaywall, purchasePro, restorePurchases }}
+      value={{ isPro, priceString, paywallVisible, isLoading, showPaywall, hidePaywall, purchase, restore }}
     >
       {children}
     </PurchaseContext.Provider>

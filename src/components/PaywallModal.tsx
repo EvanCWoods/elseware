@@ -15,6 +15,7 @@ interface PaywallModalProps {
   onPurchase: () => Promise<void>;
   onRestore: () => Promise<void>;
   isLoading: boolean;
+  priceString: string | null;
 }
 
 function BenefitRow({ icon, title, description }: { icon: string; title: string; description: string }) {
@@ -29,7 +30,7 @@ function BenefitRow({ icon, title, description }: { icon: string; title: string;
   );
 }
 
-export function PaywallModal({ visible, onClose, onPurchase, onRestore, isLoading }: PaywallModalProps) {
+export function PaywallModal({ visible, onClose, onPurchase, onRestore, isLoading, priceString }: PaywallModalProps) {
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.overlay}>
@@ -67,7 +68,9 @@ export function PaywallModal({ visible, onClose, onPurchase, onRestore, isLoadin
             {isLoading ? (
               <ActivityIndicator color={theme.white} />
             ) : (
-              <Text style={styles.purchaseButtonText}>Unlock Forever</Text>
+              <Text style={styles.purchaseButtonText}>
+                {priceString ? `Unlock Forever — ${priceString}` : 'Unlock Forever'}
+              </Text>
             )}
           </Pressable>
 

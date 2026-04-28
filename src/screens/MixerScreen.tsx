@@ -28,8 +28,7 @@ export function MixerScreen() {
   const [channels, setChannels] = useState<Record<string, ChannelState>>(buildInitialChannels);
   const [activePreset, setActivePreset] = useState<string | null>(null);
 
-  const { isPro, isLoading, showPaywall, setShowPaywall, purchasePro, restorePurchases } =
-    usePurchaseContext();
+  const { isPro, priceString, paywallVisible, isLoading, showPaywall, hidePaywall, purchase, restore } = usePurchaseContext();
 
   const { toggleChannel, setChannelVolume, handleMasterVolume, applyPreset, soundsRef } =
     useAudioEngine(channels, masterVolume, setChannels, setMasterVolume, isPro);
@@ -44,10 +43,10 @@ export function MixerScreen() {
       setActivePreset(null);
       const result = await toggleChannel(id);
       if (result === 'limit_reached') {
-        setShowPaywall(true);
+        showPaywall();
       }
     },
-    [toggleChannel, setShowPaywall],
+    [toggleChannel, showPaywall],
   );
 
   const handleVolumeChange = useCallback(
@@ -61,12 +60,12 @@ export function MixerScreen() {
     async (preset: Preset) => {
       const result = await applyPreset(preset);
       if (result === 'limit_reached') {
-        setShowPaywall(true);
+        showPaywall();
         return;
       }
       setActivePreset(preset.name === 'Clear All' ? null : preset.name);
     },
-    [applyPreset, setShowPaywall],
+    [applyPreset, showPaywall],
   );
 
   const handleSaveMix = useCallback(() => {
@@ -97,7 +96,7 @@ export function MixerScreen() {
       const preset: Preset = { name: mix.name, music, sfx };
       const result = await applyPreset(preset);
       if (result === 'limit_reached') {
-        setShowPaywall(true);
+        showPaywall();
         return;
       }
       setActivePreset(null);
@@ -105,7 +104,7 @@ export function MixerScreen() {
         handleMasterVolume(mix.masterVolume);
       }
     },
-    [applyPreset, setShowPaywall, masterVolume, handleMasterVolume],
+    [applyPreset, showPaywall, masterVolume, handleMasterVolume],
   );
 
   return (
@@ -124,7 +123,7 @@ export function MixerScreen() {
 
         {!isPro && (
           <View style={styles.proButtonWrapper}>
-            <Pressable style={styles.proButton} onPress={() => setShowPaywall(true)}>
+            <Pressable style={styles.proButton} onPress={showPaywall}>
               <Text style={styles.proButtonText}>UPGRADE TO PRO</Text>
             </Pressable>
           </View>
@@ -224,11 +223,12 @@ export function MixerScreen() {
       </ScrollView>
 
       <PaywallModal
-        visible={showPaywall}
-        onClose={() => setShowPaywall(false)}
-        onPurchase={purchasePro}
-        onRestore={restorePurchases}
+        visible={paywallVisible}
+        onClose={hidePaywall}
+        onPurchase={purchase}
+        onRestore={restore}
         isLoading={isLoading}
+        priceString={priceString}
       />
     </View>
   );
