@@ -1,0 +1,9 @@
+{
+  "_doc": "Add a founder by appending to the array. Order doesn't matter — render-founders.js sorts alphabetically by handle. Cap at 1000 entries; price ladder rule says price hikes to $14.99 at unlock #5,001 but only the first 1,000 paid unlocks get a public-wall slot.",
+  "_schema": {
+    "handle": "@instagram_handle (or @x_handle, or just a name) — required",
+    "platform": "ig | x | name (optional, defaults to handle prefix)",
+    "unlocked_at": "YYYY-MM-DD (optional, kept private — only count is shown)"
+  },
+  "founders": []
+}

@@ -8,12 +8,15 @@ import { useAudioEngine } from '../hooks/useAudioEngine';
 import { useVUMeter } from '../hooks/useVUMeter';
 import { useBackgroundAudioGate } from '../hooks/useBackgroundAudioGate';
 import { useSavedMixes } from '../hooks/useSavedMixes';
+import { useFocusTimer } from '../hooks/useFocusTimer';
 import { usePurchaseContext } from '../context/PurchaseContext';
 import { Header } from '../components/Header';
 import { ChannelStrip } from '../components/ChannelStrip';
 import { PresetButton } from '../components/PresetButton';
 import { BackgroundShapes } from '../components/BackgroundShapes';
 import { PaywallModal } from '../components/PaywallModal';
+import { FocusTimer } from '../components/FocusTimer';
+import { EmailCaptureCard } from '../components/EmailCaptureCard';
 
 function buildInitialChannels(): Record<string, ChannelState> {
   const channels: Record<string, ChannelState> = {};
@@ -28,13 +31,26 @@ export function MixerScreen() {
   const [channels, setChannels] = useState<Record<string, ChannelState>>(buildInitialChannels);
   const [activePreset, setActivePreset] = useState<string | null>(null);
 
-  const { isPro, priceString, paywallVisible, isLoading, showPaywall, hidePaywall, purchase, restore } = usePurchaseContext();
+  const {
+    isPro,
+    priceString,
+    paywallVisible,
+    isLoading,
+    showPaywall,
+    hidePaywall,
+    purchase,
+    restore,
+    needsEmailCapture,
+    captureEmail,
+    dismissEmailCapture,
+  } = usePurchaseContext();
 
   const { toggleChannel, setChannelVolume, handleMasterVolume, applyPreset, soundsRef } =
     useAudioEngine(channels, masterVolume, setChannels, setMasterVolume, isPro);
 
   const vuLevel = useVUMeter(channels, masterVolume);
   const { savedMixes, saveMix, deleteMix } = useSavedMixes(isPro);
+  const focusTimer = useFocusTimer();
 
   useBackgroundAudioGate(isPro, channels, soundsRef);
 
@@ -58,6 +74,10 @@ export function MixerScreen() {
 
   const handlePreset = useCallback(
     async (preset: Preset) => {
+      if (preset.lifetimeOnly && !isPro) {
+        showPaywall();
+        return;
+      }
       const result = await applyPreset(preset);
       if (result === 'limit_reached') {
         showPaywall();
@@ -65,7 +85,7 @@ export function MixerScreen() {
       }
       setActivePreset(preset.name === 'Clear All' ? null : preset.name);
     },
-    [applyPreset, showPaywall],
+    [applyPreset, showPaywall, isPro],
   );
 
   const handleSaveMix = useCallback(() => {
@@ -124,10 +144,27 @@ export function MixerScreen() {
         {!isPro && (
           <View style={styles.proButtonWrapper}>
             <Pressable style={styles.proButton} onPress={showPaywall}>
-              <Text style={styles.proButtonText}>UPGRADE TO PRO</Text>
+              <Text style={styles.proButtonText}>UNLOCK FOREVER</Text>
             </Pressable>
           </View>
         )}
+
+        {needsEmailCapture && (
+          <EmailCaptureCard onSubmit={captureEmail} onDismiss={dismissEmailCapture} />
+        )}
+
+        <FocusTimer
+          status={focusTimer.status}
+          remainingSeconds={focusTimer.remainingSeconds}
+          totalSeconds={focusTimer.totalSeconds}
+          isPro={isPro}
+          onStart={focusTimer.start}
+          onPause={focusTimer.pause}
+          onResume={focusTimer.resume}
+          onCancel={focusTimer.cancel}
+          onDismissCompleted={focusTimer.dismissCompleted}
+          onLockedPress={showPaywall}
+        />
 
         {/* Music Section */}
         <View style={styles.section}>
@@ -179,6 +216,7 @@ export function MixerScreen() {
                 name={preset.name}
                 isActive={activePreset === preset.name}
                 onPress={() => handlePreset(preset)}
+                locked={!!preset.lifetimeOnly && !isPro}
               />
             ))}
           </ScrollView>

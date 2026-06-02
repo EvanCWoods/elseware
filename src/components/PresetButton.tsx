@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { theme } from '../config/theme';
 
 interface PresetButtonProps {
@@ -7,9 +7,10 @@ interface PresetButtonProps {
   isActive: boolean;
   onPress: () => void;
   onLongPress?: () => void;
+  locked?: boolean;
 }
 
-export function PresetButton({ name, isActive, onPress, onLongPress }: PresetButtonProps) {
+export function PresetButton({ name, isActive, onPress, onLongPress, locked }: PresetButtonProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -17,12 +18,24 @@ export function PresetButton({ name, isActive, onPress, onLongPress }: PresetBut
       style={({ pressed }) => [
         styles.button,
         isActive && styles.buttonActive,
+        locked && styles.buttonLocked,
         pressed && styles.buttonPressed,
       ]}
     >
-      <Text style={[styles.label, isActive && styles.labelActive]}>
-        {name}
-      </Text>
+      <View style={styles.row}>
+        {locked && (
+          <Text style={[styles.lock, isActive && styles.lockActive]}>◆</Text>
+        )}
+        <Text
+          style={[
+            styles.label,
+            isActive && styles.labelActive,
+            locked && !isActive && styles.labelLocked,
+          ]}
+        >
+          {name}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -41,9 +54,27 @@ const styles = StyleSheet.create({
     backgroundColor: theme.accent,
     borderColor: theme.accent,
   },
+  buttonLocked: {
+    backgroundColor: theme.bgWarm,
+    borderStyle: 'dashed',
+    borderColor: theme.accentLight,
+  },
   buttonPressed: {
     opacity: 0.8,
     transform: [{ scale: 0.97 }],
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  lock: {
+    fontSize: 9,
+    color: theme.accent,
+    marginRight: 2,
+  },
+  lockActive: {
+    color: theme.white,
   },
   label: {
     fontSize: 13,
@@ -52,5 +83,8 @@ const styles = StyleSheet.create({
   },
   labelActive: {
     color: theme.white,
+  },
+  labelLocked: {
+    color: theme.textDim,
   },
 });

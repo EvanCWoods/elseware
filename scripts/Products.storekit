@@ -1,0 +1,47 @@
+{
+  "_comment_top": "Xcode StoreKit Configuration File. Wire it into Xcode (Product → Scheme → Edit Scheme → Run → Options → StoreKit Configuration → choose this file) for local IAP testing without sandbox accounts. See marketing/11-REVENUECAT-AND-IAP-SETUP.md Step 6.",
+  "identifier": "elseware-storekit-config",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "9.99",
+      "familyShareable": false,
+      "internalID": "elseware_lifetime_unlock_v1",
+      "localizations": [
+        {
+          "description": "The audio uniform of locking in. Mix all 18 channels, save unlimited mixes, background playback, secret presets, wallpapers, the focus timer, and all future places — yours forever.",
+          "displayName": "Elseware Lifetime Unlock",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.blocksoftware.elseware.lifetime_unlock",
+      "referenceName": "Elseware Lifetime Unlock",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "14.99",
+      "familyShareable": false,
+      "internalID": "elseware_lifetime_unlock_v2",
+      "localizations": [
+        {
+          "description": "The audio uniform of locking in. Mix all 18 channels, save unlimited mixes, background playback, secret presets, wallpapers, the focus timer, and all future places — yours forever.",
+          "displayName": "Elseware Lifetime Unlock",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.blocksoftware.elseware.lifetime_unlock_v2",
+      "referenceName": "Elseware Lifetime Unlock (v2 — post-cutover)",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}

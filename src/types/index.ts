@@ -16,6 +16,7 @@ export interface Preset {
   name: string;
   music: Record<string, number>;
   sfx: Record<string, number>;
+  lifetimeOnly?: boolean;
 }
 
 export interface SavedMix {

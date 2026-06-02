@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Launch Status — Elseware</title>
+  <meta name="description" content="Public dashboard for Elseware. Cumulative unlocks, founders wall fill, the price ladder, and what we're shipping next.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat {
+      background: #ffffff;
+      border: 1px solid #e8e4de;
+      border-radius: 14px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a89e94;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .stat-value {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+      font-size: 2.6rem;
+      font-weight: 300;
+      color: #2e2a24;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-sub {
+      font-size: 0.75rem;
+      color: #a89e94;
+      margin-top: 0.5rem;
+    }
+    .stat.accent {
+      background: #f3eef6;
+      border-color: #e8ddef;
+    }
+    .stat.accent .stat-value { color: #a688b5; }
+
+    .price-ladder-card {
+      background: #ffffff;
+      border: 1px solid #e8e4de;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .price-ladder-card h3 {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a89e94;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    .ladder-meter {
+      width: 100%;
+      height: 16px;
+      background: #f4f1ec;
+      border: 1px solid #e8e4de;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+    .ladder-fill {
+      height: 100%;
+      background: #a688b5;
+      transition: width 0.3s ease;
+    }
+    .ladder-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #7a7268;
+      font-variant-numeric: tabular-nums;
+    }
+    .ladder-summary {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #2e2a24;
+    }
+    .ladder-summary strong { color: #a688b5; }
+
+    .roadmap {
+      margin-bottom: 2rem;
+    }
+    .roadmap-section {
+      margin-bottom: 1.5rem;
+    }
+    .roadmap-section h3 {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a89e94;
+      font-weight: 600;
+      margin-bottom: 0.65rem;
+    }
+    .roadmap-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .roadmap-item {
+      background: #ffffff;
+      border: 1px solid #e8e4de;
+      border-radius: 12px;
+      padding: 0.85rem 1.1rem;
+      font-size: 0.95rem;
+      color: #2e2a24;
+      display: flex;
+      gap: 0.85rem;
+      align-items: baseline;
+    }
+    .roadmap-item.shipped::before {
+      content: "✓";
+      color: #6aab68;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .roadmap-item.in-progress::before {
+      content: "●";
+      color: #a688b5;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .roadmap-item.next::before {
+      content: "→";
+      color: #a89e94;
+      flex-shrink: 0;
+    }
+    .roadmap-date {
+      color: #a89e94;
+      font-size: 0.85rem;
+      font-variant-numeric: tabular-nums;
+      margin-right: 0.5rem;
+    }
+
+    .commitments {
+      background: #faf8f4;
+      border: 1px solid #e8e4de;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .commitments h2 {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.5rem;
+      color: #2e2a24;
+      margin-bottom: 1rem;
+    }
+    .commitments-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .commitments-list li {
+      padding: 0.7rem 0;
+      border-bottom: 1px solid #e8e4de;
+      color: #2e2a24;
+    }
+    .commitments-list li:last-child { border-bottom: none; }
+    .commitments-list .commitment-label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .commitments-list .commitment-trigger {
+      color: #7a7268;
+      font-size: 0.9rem;
+    }
+    .commitments-list .commitment-trigger em {
+      color: #a688b5;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    .dont-do {
+      margin-bottom: 2rem;
+    }
+    .dont-do h3 {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a89e94;
+      font-weight: 600;
+      margin-bottom: 0.65rem;
+    }
+    .dont-do-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .dont-do-list li {
+      background: #ffffff;
+      border: 1px solid #e8e4de;
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
+      color: #7a7268;
+    }
+    .dont-do-list li::before {
+      content: "no ";
+      color: #c97070;
+      font-weight: 600;
+    }
+
+    .now-card {
+      background: #f3eef6;
+      border: 1px solid #e8ddef;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .now-card-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #a688b5;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .now-card-text {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.4rem;
+      color: #2e2a24;
+      line-height: 1.3;
+    }
+
+    .as-of {
+      text-align: center;
+      color: #a89e94;
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">Elseware</a>
+      <div class="nav-links">
+        <a href="/protocol.html">Protocol</a>
+        <a href="/founders.html">Founders</a>
+        <a href="/launch-status.html">Status</a>
+        <a href="/support.html">Support</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="legal">
+      <p class="eyebrow">PUBLIC DASHBOARD</p>
+      <h1>What we're building, in the open.</h1>
+      <p class="last-updated">Updated <span data-status="as_of">2026-04-29</span> · Phase: <span data-status="phase">pre-launch</span></p>
+
+      <div class="now-card">
+        <p class="now-card-label">RIGHT NOW</p>
+        <p class="now-card-text" data-status="now">shipping the day-1 reels batch and submitting the IAP build to apple</p>
+      </div>
+
+      <div class="status-grid">
+        <div class="stat accent">
+          <p class="stat-label">Lifetime Unlocks</p>
+          <p class="stat-value" data-status="unlocks">0</p>
+          <p class="stat-sub">cumulative, all-time</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Founders Named</p>
+          <p class="stat-value"><span data-status="founders_named">0</span> / <span data-status="founders_cap">1,000</span></p>
+          <p class="stat-sub">on the public wall</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Current Price</p>
+          <p class="stat-value">$<span data-status="current_price">9.99</span></p>
+          <p class="stat-sub">one purchase, yours forever</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Next Price</p>
+          <p class="stat-value">$<span data-status="next_price">14.99</span></p>
+          <p class="stat-sub">at unlock #<span data-status="ladder_threshold">5,000</span></p>
+        </div>
+      </div>
+
+      <div class="price-ladder-card">
+        <h3>The Price Ladder</h3>
+        <div class="ladder-meter">
+          <div class="ladder-fill" data-status="ladder_fill_style" style="width: 0.0%"></div>
+        </div>
+        <div class="ladder-meta">
+          <span><span data-status="unlocks_inline">0</span> unlocks</span>
+          <span data-status="ladder_threshold_inline">5,000</span>
+        </div>
+        <p class="ladder-summary"><strong data-status="unlocks_remaining">5,000</strong> unlocks left at $<span data-status="current_price_inline">9.99</span>. Then $<span data-status="next_price_inline">14.99</span>, forever. Honest deadline.</p>
+      </div>
+
+      <h2>Roadmap</h2>
+      <div class="roadmap">
+        <div class="roadmap-section">
+          <h3>Shipped</h3>
+          <ul class="roadmap-list" data-status="roadmap_shipped">
+          <li class="roadmap-item shipped">Six places: Tokyo Kissaten, Lisbon Rainstorm, Library in Seoul, Trans-Siberian, Bali Morning, Tulum Beachfront</li>
+          <li class="roadmap-item shipped">Eighteen sound channels — six music, twelve soundscapes</li>
+          <li class="roadmap-item shipped">Save unlimited mixes</li>
+          <li class="roadmap-item shipped">Background playback</li>
+          <li class="roadmap-item shipped">The 90-Minute Focus Timer</li>
+        </ul>
+        </div>
+        <div class="roadmap-section">
+          <h3>In progress</h3>
+          <ul class="roadmap-list" data-status="roadmap_in_progress">
+          <li class="roadmap-item in-progress">App Store submission with the new Lifetime Unlock paywall</li>
+          <li class="roadmap-item in-progress">Day-1 IG content batch — first seven Reels for launch week</li>
+        </ul>
+        </div>
+        <div class="roadmap-section">
+          <h3>Next quarters</h3>
+          <ul class="roadmap-list" data-status="roadmap_next">
+          <li class="roadmap-item next"><span class="roadmap-date">2026-07-15</span>Marrakech Rooftop — Q2 place drop. Free for lifetime owners.</li>
+          <li class="roadmap-item next"><span class="roadmap-date">2026-10-15</span>Copenhagen Apartment — Q3 place drop. Free for lifetime owners.</li>
+          <li class="roadmap-item next"><span class="roadmap-date">2027-01-15</span>Nairobi Sunrise — Q4 place drop. Free for lifetime owners.</li>
+        </ul>
+        </div>
+      </div>
+
+      <div class="commitments">
+        <h2>What we publicly commit to.</h2>
+        <ul class="commitments-list" data-status="commitments">
+
+            <li>
+              <span class="commitment-label">Founders Wall closes</span>
+              <span class="commitment-trigger"><em>at unlock #1,000</em> — no new handles added to the wall after that</span>
+            </li>
+            <li>
+              <span class="commitment-label">Price rises to <ul class="commitments-list" data-status="commitments">4.99 forever</span>
+              <span class="commitment-trigger"><em>at unlock #5,001</em> — everyone before that pays $9.99 once and owns it forever</span>
+            </li>
+            <li>
+              <span class="commitment-label">Quarterly preset drops</span>
+              <span class="commitment-trigger"><em>every quarter</em> — free for everyone who owns lifetime, regardless of when they bought</span>
+            </li>
+            <li>
+              <span class="commitment-label">60-day money-back guarantee</span>
+              <span class="commitment-trigger"><em>any time within 60 days of purchase</em> — refund@elseware.app, no questions asked, keep the bonuses</span>
+            </li>
+        </ul>
+      </div>
+
+      <div class="dont-do">
+        <h3>What we don't do</h3>
+        <ul class="dont-do-list" data-status="dont_do">
+          <li>Subscriptions</li>
+          <li>Discounts or sales</li>
+          <li>Email newsletters</li>
+          <li>Tracking pixels</li>
+          <li>Pop-ups asking you to follow us</li>
+          <li>Engagement-bait notifications</li>
+        </ul>
+      </div>
+
+      <p class="as-of">data updated <span data-status="as_of_foot">2026-04-29</span> · regenerated with <code>node scripts/render-launch-status.js</code></p>
+      <p style="text-align:center; margin-top: 2rem;"><a href="/">← back to Elseware</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span>&copy; 2026 Elseware. Made by Block Software.</span>
+      <div class="footer-links">
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/support.html">Support</a>
+        <a href="/launch-status.html">Status</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

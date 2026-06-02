@@ -6,7 +6,19 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "gen:wallpapers": "node scripts/generate-wallpapers.js",
+    "gen:app-store": "node scripts/generate-app-store-screenshots.js",
+    "gen:icons": "node scripts/generate-icon-variants.js",
+    "gen:all": "npm run gen:wallpapers && npm run gen:app-store && npm run gen:icons",
+    "render:founders": "node scripts/render-founders.js",
+    "render:status": "node scripts/render-launch-status.js",
+    "render:all": "npm run render:founders && npm run render:status",
+    "status:weekly": "node scripts/render-launch-status.js",
+    "sync:analytics": "node scripts/sync-analytics.js",
+    "friday": "node scripts/sync-analytics.js && node scripts/render-launch-status.js",
+    "prerelease": "npm run gen:all && npm run render:all",
+    "preview": "node scripts/preview-server.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

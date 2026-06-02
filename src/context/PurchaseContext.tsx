@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Purchases, { CustomerInfo, PurchasesPackage } from 'react-native-purchases';
 import { REVENUECAT_API_KEY, ENTITLEMENT_ID } from '../config/constants';
 
@@ -11,7 +12,12 @@ interface PurchaseContextValue {
   hidePaywall: () => void;
   purchase: () => Promise<void>;
   restore: () => Promise<void>;
+  needsEmailCapture: boolean;
+  captureEmail: (email: string) => Promise<void>;
+  dismissEmailCapture: () => Promise<void>;
 }
+
+const EMAIL_CAPTURE_STATE_KEY = '@elseware/email_capture_state';
 
 const PurchaseContext = createContext<PurchaseContextValue>({
   isPro: false,
@@ -22,6 +28,9 @@ const PurchaseContext = createContext<PurchaseContextValue>({
   hidePaywall: () => {},
   purchase: async () => {},
   restore: async () => {},
+  needsEmailCapture: false,
+  captureEmail: async () => {},
+  dismissEmailCapture: async () => {},
 });
 
 export function usePurchaseContext() {
@@ -34,13 +43,25 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
   const [priceString, setPriceString] = useState<string | null>(null);
   const [paywallVisible, setPaywallVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [needsEmailCapture, setNeedsEmailCapture] = useState(false);
+  const captureStateLoadedRef = useRef(false);
 
   useEffect(() => {
     async function init() {
       try {
         Purchases.configure({ apiKey: REVENUECAT_API_KEY });
         const customerInfo = await Purchases.getCustomerInfo();
-        checkEntitlement(customerInfo);
+        const wasPro = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
+        setIsPro(wasPro);
+
+        // If the user is already pro and we've never asked for / been told no
+        // about email, surface the capture card. Catches users who purchased
+        // on a previous app version.
+        const captureState = await AsyncStorage.getItem(EMAIL_CAPTURE_STATE_KEY);
+        captureStateLoadedRef.current = true;
+        if (wasPro && !captureState) {
+          setNeedsEmailCapture(true);
+        }
 
         const offerings = await Purchases.getOfferings();
         const current = offerings.current;
@@ -56,17 +77,15 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
 
     init();
 
-    const onUpdate = (info: CustomerInfo) => checkEntitlement(info);
+    const onUpdate = (info: CustomerInfo) => {
+      setIsPro(!!info.entitlements.active[ENTITLEMENT_ID]);
+    };
     Purchases.addCustomerInfoUpdateListener(onUpdate);
 
     return () => {
       Purchases.removeCustomerInfoUpdateListener(onUpdate);
     };
   }, []);
-
-  function checkEntitlement(info: CustomerInfo) {
-    setIsPro(!!info.entitlements.active[ENTITLEMENT_ID]);
-  }
 
   function showPaywall() {
     setPaywallVisible(true);
@@ -81,8 +100,16 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const { customerInfo } = await Purchases.purchasePackage(pkg);
-      checkEntitlement(customerInfo);
+      const becamePro = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
+      setIsPro(becamePro);
       setPaywallVisible(false);
+
+      if (becamePro && captureStateLoadedRef.current) {
+        const captureState = await AsyncStorage.getItem(EMAIL_CAPTURE_STATE_KEY);
+        if (!captureState) {
+          setNeedsEmailCapture(true);
+        }
+      }
     } catch (e: any) {
       if (!e.userCancelled) {
         console.warn('Purchase error:', e);
@@ -96,9 +123,14 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const customerInfo = await Purchases.restorePurchases();
-      checkEntitlement(customerInfo);
-      if (customerInfo.entitlements.active[ENTITLEMENT_ID]) {
+      const becamePro = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
+      setIsPro(becamePro);
+      if (becamePro) {
         setPaywallVisible(false);
+        const captureState = await AsyncStorage.getItem(EMAIL_CAPTURE_STATE_KEY);
+        if (!captureState) {
+          setNeedsEmailCapture(true);
+        }
       }
     } catch (e) {
       console.warn('Restore error:', e);
@@ -107,9 +139,32 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  async function captureEmail(email: string) {
+    await Purchases.setEmail(email);
+    await AsyncStorage.setItem(EMAIL_CAPTURE_STATE_KEY, 'captured');
+    setNeedsEmailCapture(false);
+  }
+
+  async function dismissEmailCapture() {
+    await AsyncStorage.setItem(EMAIL_CAPTURE_STATE_KEY, 'dismissed');
+    setNeedsEmailCapture(false);
+  }
+
   return (
     <PurchaseContext.Provider
-      value={{ isPro, priceString, paywallVisible, isLoading, showPaywall, hidePaywall, purchase, restore }}
+      value={{
+        isPro,
+        priceString,
+        paywallVisible,
+        isLoading,
+        showPaywall,
+        hidePaywall,
+        purchase,
+        restore,
+        needsEmailCapture,
+        captureEmail,
+        dismissEmailCapture,
+      }}
     >
       {children}
     </PurchaseContext.Provider>

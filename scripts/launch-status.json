@@ -1,0 +1,74 @@
+{
+  "_doc": "Operator's source of truth for elseware.app/launch-status. Update this file, run `node scripts/render-launch-status.js`, commit, push. Vercel auto-deploys. The page is the public 'build-in-public' amplifier — every number visible is honest. If you stop updating it, the public will see stale dates. That's the truth-telling cost we accept.",
+  "as_of": "2026-04-29",
+  "phase": "pre-launch",
+  "_phases": "pre-launch | launching | scaling | post-cutover",
+  "now_working_on": "shipping the day-1 reels batch and submitting the IAP build to apple",
+  "counters": {
+    "cumulative_unlocks": 0,
+    "_doc_unlocks": "Pull from RevenueCat dashboard → All-time paying users. Update at least weekly during launch month, daily once unlocks > 100/day.",
+    "founders_named": 0,
+    "_doc_founders": "Number of handles currently on the founders wall. Mirror this from scripts/founders.json's founders[].length so the two never diverge.",
+    "founders_cap": 1000,
+    "price_ladder_threshold": 5000,
+    "current_price_usd": 9.99,
+    "next_price_usd": 14.99
+  },
+  "roadmap": {
+    "shipped": [
+      "Six places: Tokyo Kissaten, Lisbon Rainstorm, Library in Seoul, Trans-Siberian, Bali Morning, Tulum Beachfront",
+      "Eighteen sound channels — six music, twelve soundscapes",
+      "Save unlimited mixes",
+      "Background playback",
+      "The 90-Minute Focus Timer"
+    ],
+    "in_progress": [
+      "App Store submission with the new Lifetime Unlock paywall",
+      "Day-1 IG content batch — first seven Reels for launch week"
+    ],
+    "next_quarter": [
+      {
+        "date": "2026-07-15",
+        "item": "Marrakech Rooftop — Q2 place drop. Free for lifetime owners."
+      },
+      {
+        "date": "2026-10-15",
+        "item": "Copenhagen Apartment — Q3 place drop. Free for lifetime owners."
+      },
+      {
+        "date": "2027-01-15",
+        "item": "Nairobi Sunrise — Q4 place drop. Free for lifetime owners."
+      }
+    ]
+  },
+  "commitments": [
+    {
+      "label": "Founders Wall closes",
+      "trigger": "at unlock #1,000",
+      "consequence": "no new handles added to the wall after that"
+    },
+    {
+      "label": "Price rises to $14.99 forever",
+      "trigger": "at unlock #5,001",
+      "consequence": "everyone before that pays $9.99 once and owns it forever"
+    },
+    {
+      "label": "Quarterly preset drops",
+      "trigger": "every quarter",
+      "consequence": "free for everyone who owns lifetime, regardless of when they bought"
+    },
+    {
+      "label": "60-day money-back guarantee",
+      "trigger": "any time within 60 days of purchase",
+      "consequence": "refund@elseware.app, no questions asked, keep the bonuses"
+    }
+  ],
+  "what_we_dont_do": [
+    "Subscriptions",
+    "Discounts or sales",
+    "Email newsletters",
+    "Tracking pixels",
+    "Pop-ups asking you to follow us",
+    "Engagement-bait notifications"
+  ]
+}

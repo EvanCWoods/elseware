@@ -199,12 +199,255 @@ footer {
   margin-bottom: 0.35rem;
 }
 
+/* Eyebrow + hero refinements */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: #a688b5;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.hero-cta {
+  margin-top: 2rem;
+}
+
+.primary-cta {
+  display: inline-block;
+  background: #a688b5;
+  color: #ffffff;
+  padding: 0.95rem 2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.primary-cta:hover {
+  background: #8a6d9a;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.price-note {
+  margin-top: 0.85rem;
+  font-size: 0.85rem;
+  color: #a89e94;
+}
+
+/* Places */
+.places {
+  padding: 3rem 0;
+  border-top: 1px solid #e8e4de;
+}
+
+.places h2,
+.anchor h2,
+.stack h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2e2a24;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.place {
+  background: #ffffff;
+  border: 1px solid #e8e4de;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.place-name {
+  font-weight: 700;
+  color: #2e2a24;
+  font-size: 1rem;
+}
+
+.place-mood {
+  color: #7a7268;
+  font-size: 0.85rem;
+}
+
+/* Anchor / comparison */
+.anchor {
+  padding: 3rem 0;
+  border-top: 1px solid #e8e4de;
+  text-align: center;
+}
+
+.compare {
+  margin: 0 auto;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 420px;
+}
+
+.compare td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #e8e4de;
+  font-size: 0.95rem;
+  color: #7a7268;
+}
+
+.compare td:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+
+.compare td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.compare tr.us td {
+  color: #2e2a24;
+  font-weight: 700;
+  background: #f3eef6;
+}
+
+.anchor-note {
+  margin-top: 1.25rem;
+  color: #7a7268;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+/* Stack list */
+.stack {
+  padding: 3rem 0;
+  border-top: 1px solid #e8e4de;
+}
+
+.stack-list {
+  list-style: none;
+  padding: 0;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.stack-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #e8e4de;
+  font-size: 0.95rem;
+  color: #2e2a24;
+}
+
+.stack-list li span:last-child {
+  color: #a688b5;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stack-anchor {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2e2a24;
+}
+
+/* Guarantee */
+.guarantee {
+  margin: 3rem auto;
+  padding: 1.5rem;
+  border: 1px solid #e8e4de;
+  border-radius: 14px;
+  max-width: 540px;
+  text-align: center;
+  background: #faf8f4;
+}
+
+.guarantee h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #2e2a24;
+  margin-bottom: 0.6rem;
+}
+
+.guarantee p {
+  color: #7a7268;
+  font-size: 0.95rem;
+}
+
+/* CTA section */
+.cta-section {
+  text-align: center;
+  padding: 2rem 0 4rem;
+}
+
+/* Founders */
+.founders-state {
+  margin: 1rem 0;
+  font-size: 1rem;
+  color: #2e2a24;
+}
+
+.founders-empty {
+  color: #a89e94;
+  font-style: italic;
+}
+
+.founders-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.founders-list li {
+  color: #7a7268;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 600px) {
+  .nav-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .nav-links {
+    width: 100%;
+    max-width: 100%;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-links a {
+    flex: 0 0 auto;
+  }
+
   .hero h1 {
     font-size: 1.75rem;
   }
 
   .features {
+    grid-template-columns: 1fr;
+  }
+
+  .places-grid {
     grid-template-columns: 1fr;
   }
 

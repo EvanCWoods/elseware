@@ -1,0 +1,105 @@
+{
+  "_doc": "Paste-ready reference for the RevenueCat dashboard. RevenueCat does not accept this JSON as a direct import; the dashboard requires manual configuration. This file is the source of truth — keep it in sync with the live dashboard. See marketing/11-REVENUECAT-AND-IAP-SETUP.md for the operator walkthrough.",
+
+  "project": {
+    "name": "Elseware",
+    "platforms": ["ios"]
+  },
+
+  "ios_app": {
+    "bundle_id": "com.blocksoftware.elseware",
+    "api_key_public": "appl_FJNZSoYWWFCPJMTbuibMXLCJpes",
+    "_doc": "API key is also referenced in src/config/constants.ts. Don't rotate without updating both."
+  },
+
+  "products": [
+    {
+      "identifier": "com.blocksoftware.elseware.lifetime_unlock",
+      "store": "app_store",
+      "type": "non_consumable",
+      "price_usd": 9.99,
+      "display_name": "Elseware Lifetime Unlock",
+      "_state": "active",
+      "_doc": "The current product sold to unlocks 1 through 5,000. Cleared for Sale: YES until cutover."
+    },
+    {
+      "identifier": "com.blocksoftware.elseware.lifetime_unlock_v2",
+      "store": "app_store",
+      "type": "non_consumable",
+      "price_usd": 14.99,
+      "display_name": "Elseware Lifetime Unlock",
+      "_state": "pre_staged",
+      "_doc": "Pre-approved by Apple. Cleared for Sale: NO until unlock #5,001. Same display name on purpose — buyer never sees the v2 suffix."
+    }
+  ],
+
+  "entitlements": [
+    {
+      "identifier": "pro",
+      "display_name": "Lifetime",
+      "_doc": "Internal ID is 'pro' for legacy reasons (don't rename — historical purchases would break). Customer-facing copy says 'Lifetime Unlock.' This entitlement grants access to all Lifetime features: secret presets, focus timer, unlimited mixes, background playback, future places.",
+      "products": [
+        "com.blocksoftware.elseware.lifetime_unlock",
+        "com.blocksoftware.elseware.lifetime_unlock_v2"
+      ]
+    }
+  ],
+
+  "offerings": [
+    {
+      "identifier": "default",
+      "display_name": "Elseware Lifetime Unlock",
+      "is_current": true,
+      "packages": [
+        {
+          "identifier": "lifetime",
+          "package_type": "lifetime",
+          "_rc_package_constant": "$rc_lifetime",
+          "product": "com.blocksoftware.elseware.lifetime_unlock",
+          "_doc": "Swap to '..._v2' on cutover at unlock #5,001. The package identifier ('lifetime') stays the same so the app code keeps working without a release."
+        }
+      ]
+    }
+  ],
+
+  "webhooks": [
+    {
+      "url": "https://api.elseware.app/webhooks/revenuecat",
+      "auth_header_env_var": "REVENUECAT_WEBHOOK_SECRET",
+      "_doc": "Generate the secret with `openssl rand -hex 32`. Save it to the serverless function's env. RevenueCat sends it as the Authorization header on every event.",
+      "events": [
+        "INITIAL_PURCHASE",
+        "RENEWAL",
+        "CANCELLATION",
+        "BILLING_ISSUE",
+        "PRODUCT_CHANGE",
+        "TRANSFER",
+        "EXPIRATION"
+      ]
+    }
+  ],
+
+  "subscriber_attributes_to_collect": {
+    "_doc": "Set these from the iOS client via Purchases.setEmail() / Purchases.setDisplayName() so the welcome email webhook has an address to send to.",
+    "$email": "Set via Purchases.setEmail(email) immediately after first purchase. Required for the welcome email.",
+    "$displayName": "Optional. Used for personalization in the founders wall.",
+    "ig_handle": "Optional. Set via Purchases.setAttributes({ ig_handle: '@handle' }) when the user replies to the welcome email with their handle."
+  },
+
+  "cutover_runbook": {
+    "_doc": "Sequence to execute when cumulative lifetime unlocks hit 5,000. Pin a Reel before each step.",
+    "steps": [
+      "1. App Store Connect → IAP `..._lifetime_unlock` → Cleared for Sale → No.",
+      "2. App Store Connect → IAP `..._lifetime_unlock_v2` → Cleared for Sale → Yes.",
+      "3. RevenueCat → Offering `default` → Package `lifetime` → swap product reference to `..._lifetime_unlock_v2`.",
+      "4. Verify: open App Store on a fresh device, confirm price reads $14.99.",
+      "5. Verify: existing owners' Restore Purchase still works (entitlement attached to BOTH products).",
+      "6. Pin a new Reel: 'founders wall closed at 5,000. price is $14.99 forever.'"
+    ]
+  },
+
+  "_test_endpoints": {
+    "sandbox_iap_test": "Use scripts/Products.storekit + Xcode StoreKit Configuration for local testing. See marketing/11-REVENUECAT-AND-IAP-SETUP.md Step 6.",
+    "smoke_test": "12-step pre-submit smoke test: marketing/11-REVENUECAT-AND-IAP-SETUP.md Step 7."
+  }
+}
